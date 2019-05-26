@@ -20,6 +20,10 @@ CaptivePortalAPServiceAirbaseOption="Rogue AP - airbase-ng (${CYel}slow$CClr)"
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 CaptivePortalVerificationMethodQuery="Select a password verification method"
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+CaptivePortalDeauthenticatorMessage="Select deauthentication method"
+CaptivePortalDeauthenticatorMdk4MethodOption="mdk4"
+CaptivePortalDeauthenticatorAireplayMethodOption="aireplay-ng (${CYel}2.4GHz only${CClr})"
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 CaptivePortalCertificateSourceQuery="Select SSL certificate source for captive portal."
 CaptivePortalCertificateSourceGenerateOption="Create an SSL certificate"
 CaptivePortalCertificateSourceRescanOption="Detect SSL certificate (${CClr}search again$CGry)"
