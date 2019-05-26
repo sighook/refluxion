@@ -5,12 +5,14 @@ Please note that this is a fork. The original project is [here](https://github.c
 
 At this point, the only difference of the fork is that it allows to deauthenticate (by "Handshake Snooper" or "Captive Portal" attack) specifiс client of Access Point, not all in a row.
 
-Simetimes it's necessary to not disconnecting all clients from the AP, but only one (the most vulnerable from the point of view of Social Engineering).
+Sometimes it's necessary to not disconnecting all clients from the AP, but only one (the most vulnerable from the point of view of Social Engineering).
 
 # TODO
-- Add 'deauth specific client' option to 5GHz `deauth-ng.py`
+- Add 'deauth specific client' option to `deauth-ng.py` (5GHz networks);
 
-- Add more phishing pretexts
+- Add more phishing pretexts;
+
+- Add pmkid support as alternative to 'Handshake Snooper';
 
 ### Now, about fluxion...
 
