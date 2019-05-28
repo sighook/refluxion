@@ -45,9 +45,13 @@ class wifijammer:
 
         self.mIgnoreList = [
             'ff:ff:ff:ff:ff:ff', '00:00:00:00:00:00', '33:33:00:', '33:33:ff:',
-            '01:80:c2:00:00:00', '01:00:5e:', '01:00:0c'] + \
+            '01:80:c2:00:00:00', '01:00:5e:', '01:00:0c'
+            ] + \
             [pyw.macget(pyw.getcard(x)) for x in pyw.winterfaces()] + \
             [x for x in args['skip'] if re.match("[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", x.lower())]
+
+        self.mWhiteList = [x for x in args['only'] if re.match("[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", x.lower())]
+        self.mWhiteList_Enabled = len(self.mWhiteList)
 
         # Args
         self.mInterface = args["interface"]
@@ -256,8 +260,13 @@ class wifijammer:
                 # print("Deauth")
                 send(p, inter=float(self.mTimeout), count=self.mPackets)
 
-    def noise_filter(self, addr1, addr2):
+    def in_blacklist(self, addr1, addr2):
         if len([y for y in self.mIgnoreList if addr1.startswith(y) or addr2.startswith(y)]) > 0:
+            return True
+        return False
+
+    def in_whitelist(self, addr1, addr2):
+        if len([y for y in self.mWhiteList if addr1 == y or addr2 == y]) > 0: # exact match
             return True
         return False
 
@@ -272,7 +281,11 @@ class wifijammer:
 
                 # Ignore all the noisy packets like spanning tree
 
-                if self.noise_filter(pkt.addr1, pkt.addr2):
+                if self.in_blacklist(pkt.addr1, pkt.addr2):
+                    return
+
+                # If whitelist is enabled, then ignore all the packets which aren't in the list
+                if self.mWhiteList and not self.in_whitelist(pkt.addr1, pkt.addr2):
                     return
 
                 # Management = 1, data = 2
@@ -412,6 +425,12 @@ def parse_args():
         default=[],
         dest="skip",
         help="Skip deauthing this MAC address")
+
+    parser.add_argument("-o", "--only",
+        nargs='*',
+        default=[],
+        dest="only",
+        help="Deauthing only this MAC address")
 
     parser.add_argument("-D", "--details",
         default=False,
