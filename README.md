@@ -8,6 +8,8 @@ At this point, the only difference of the fork is that it allows to deauthentica
 Sometimes it's necessary to not disconnecting all clients from the AP, but only one (the most vulnerable from the point of view of Social Engineering).
 
 # TODO
+- Add 'mdk3' as deauthenticate option.
+
 - Add 'deauth specific client' option to `deauth-ng.py` (5GHz networks):
 	- Added to 'Captive Portal' but need to test.
 
