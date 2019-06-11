@@ -3,15 +3,18 @@
 # Fork
 Please note that this is a fork. The original project is [here](https://github.com/FluxionNetwork/fluxion).
 
-At this point, the only difference of the fork is that it allows to deauthenticate (by "Handshake Snooper" or "Captive Portal" attack) specifiс client of Access Point, not all in a row.
+### Differences:
+
+- allow to deauthenticate (by "Handshake Snooper" or "Captive Portal" attack) specifiс client of Access Point
 
 Sometimes it's necessary to not disconnecting all clients from the AP, but only one (the most vulnerable from the point of view of Social Engineering).
 
+- mdk3 deauthentication tool support ([fix this issue](https://github.com/FluxionNetwork/fluxion/issues/749))
+
 # TODO
-- Add 'mdk3' as deauthenticate option.
 
 - Add 'deauth specific client' option to `deauth-ng.py` (5GHz networks):
-	- Added to 'Captive Portal' but need to test.
+	- Added to 'Captive Portal' but need to test ([done](https://github.com/chinarulezzz/refluxion/commit/149016c79c0159d2279f8d24f83115ed731ffd54), need to test)
 
 	- Also, need to add to 'Handshake Snooper'.
 
