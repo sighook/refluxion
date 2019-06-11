@@ -31,7 +31,7 @@ If you need quick help, fluxion is also available on gitter. You can talk with u
 
 ## Injection
 
-If your network card supports 5GHz networks, you must check if your card supports also [https://www.aircrack-ng.org/doku.php?id=injection_test](injection attacks).
+If your network card supports 5GHz networks, you must check if your card supports also [injection attacks](https://www.aircrack-ng.org/doku.php?id=injection_test).
 
 You will need this in future.
 
