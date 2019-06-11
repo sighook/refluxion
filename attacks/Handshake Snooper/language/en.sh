@@ -5,9 +5,16 @@
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 HandshakeSnooperJammerInterfaceQuery="Select an interface for monitoring & jamming."
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-HandshakeSnooperMethodQuery="Select a method of handshake retrieval"
+HandshakeSnooperMethodQuery="Select a method of handshake retrieval:
+
+NOTE:
+- ${CGrn}aireplay-ng${CClr} can de-authenticate ${CYel}specific${CClr} client.
+- ${CGrn}mdk3${CClr} would send both disassociation and de-authentication packets, but it affect all the clients.
+- ${CGrn}mdk4${CClr} is a new version of ${CGrn}mdk3${CClr}.
+"
 HandshakeSnooperMonitorMethodOption="Monitor (${CYel}passive$CClr)"
 HandshakeSnooperAireplayMethodOption="aireplay-ng deauthentication (${CRed}aggressive$CClr)"
+HandshakeSnooperMdk3MethodOption="mdk3 deauthentication (${CRed}aggressive$CClr)"
 HandshakeSnooperMdk4MethodOption="mdk4 deauthentication (${CRed}aggressive$CClr)"
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 HandshakeSnooperVerifierIntervalQuery="How often should the verifier check for a handshake?"

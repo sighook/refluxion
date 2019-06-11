@@ -20,9 +20,16 @@ CaptivePortalAPServiceAirbaseOption="Rogue AP - airbase-ng (${CYel}slow$CClr)"
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 CaptivePortalVerificationMethodQuery="Select a password verification method"
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-CaptivePortalDeauthenticatorMessage="Select deauthentication method"
-CaptivePortalDeauthenticatorMdk4MethodOption="mdk4"
+CaptivePortalDeauthenticatorMessage="Select deauthentication method:
+
+NOTE:
+- ${CGrn}aireplay-ng${CClr} can de-authenticate ${CYel}specific${CClr} client.
+- ${CGrn}mdk3${CClr} would send both disassociation and de-authentication packets, but it affect all the clients.
+- ${CGrn}mdk4${CClr} is a new version of ${CGrn}mdk3${CClr}.
+"
 CaptivePortalDeauthenticatorAireplayMethodOption="aireplay-ng (${CYel}2.4GHz only${CClr})"
+CaptivePortalDeauthenticatorMdk3MethodOption="mdk3"
+CaptivePortalDeauthenticatorMdk4MethodOption="mdk4"
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 CaptivePortalCertificateSourceQuery="Select SSL certificate source for captive portal."
 CaptivePortalCertificateSourceGenerateOption="Create an SSL certificate"

