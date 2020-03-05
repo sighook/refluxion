@@ -5,9 +5,27 @@ Please note that this is a fork. The original project is [here](https://github.c
 
 ### Differences:
 
-- allow to deauthenticate (by "Handshake Snooper" or "Captive Portal" attack) specifiс client of Access Point
+- Allows to deauthenticate (by "Handshake Snooper" or "Captive Portal" attack) specifiс client of the Access Point
 
-Sometimes it's necessary to not disconnecting all clients from the AP, but only one (the most vulnerable from the point of view of Social Engineering).
+  Sometimes it's necessary to not disconnecting all clients from the AP, but only one (the most vulnerable from the point of view of Social Engineering).
+
+  Also, see [this patch](https://github.com/chinarulezzz/refluxion/blob/master/0001-airodump-ng.c-add-manufacturer-column-to-the-client-.patch). I think this will come in handy: it adds manufacturer column to the client list.
+  
+  Something like this:
+```
+   CH  7 ][ Elapsed: 6 s ][ 2020-03-05 01:56
+ BSSID              PWR  Beacons    #Data, #/s  CH   MB   ENC CIPHER  AUTH ESSI              MANUFACTURER
+ XX:XX:XX:XX:XX:XX  -60        5        0    0  11  270   WPA2 CCMP   PSK  XXXXXXXXXXXX      TP-LINK TECHNOLOGIES CO.,LTD.
+ XX:XX:XX:XX:XX:XX  -68        5        0    0  11  270   WPA2 CCMP   PSK  XXXXXXXXXXXX      TP-LINK TECHNOLOGIES CO.,LTD.
+ XX:XX:XX:XX:XX:XX  -71        5       45    0  11  130   WPA2 CCMP   PSK  OpenWrt           TP-LINK TECHNOLOGIES CO.,LTD.
+ XX:XX:XX:XX:XX:XX  -76        5        0    0   4   65   WPA2 CCMP   PSK  XXXXXXXXXXXX      HUAWEI TECHNOLOGIES CO.,LTD
+ XX:XX:XX:XX:XX:XX  -78        3        0    0   4  270   WPA2 CCMP   PSK  XXXXX             TP-LINK TECHNOLOGIES CO.,LTD.
+
+ BSSID              STATION            PWR   Rate    Lost    Frames  Notes  Manufacturer                    Probes
+ XX:XX:XX:XX:XX:XX  XX:XX:XX:XX:XX:XX  -54    0 - 0e     0        1         Hon Hai Precision Ind. Co.,Ltd. XXX,XXXXX,XXXXXX
+ XX:XX:XX:XX:XX:XX  XX:XX:XX:XX:XX:XX  -38    0 - 0e   155       43         Liteon Technology Corporation
+Quitting...
+```
 
 - mdk3 deauthentication tool support ([fix this issue](https://github.com/FluxionNetwork/fluxion/issues/749))
 
