@@ -263,17 +263,6 @@ fluxion_startup() {
   echo -e "$FormatCenterLiterals"
 
   sleep 0.1
-  local -r fluxionDomain="raw.githubusercontent.com"
-  local -r fluxionPath="FluxionNetwork/fluxion/master/fluxion.sh"
-  local -r updateDomain="github.com"
-  local -r updatePath="FluxionNetwork/fluxion/archive/master.zip"
-  if installer_utils_check_update "https://$fluxionDomain/$fluxionPath" \
-    "FLUXIONVersion=" "FLUXIONRevision=" \
-    $FLUXIONVersion $FLUXIONRevision; then
-    installer_utils_run_update "https://$updateDomain/$updatePath" \
-      "FLUXION-V$FLUXIONVersion.$FLUXIONRevision" "$FLUXIONPath"
-    fluxion_shutdown
-  fi
 
   echo # Do not remove.
 
