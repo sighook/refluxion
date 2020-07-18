@@ -251,7 +251,7 @@ fluxion_startup() {
   echo # Do not remove.
 
   sleep 0.1
-  local -r fluxionRepository="https://github.com/FluxionNetwork/fluxion"
+  local -r fluxionRepository="https://github.com/chinarulezzz/refluxion"
   format_center_literals "${CGrn}Site: ${CRed}$fluxionRepository$CClr"
   echo -e "$FormatCenterLiterals"
 
